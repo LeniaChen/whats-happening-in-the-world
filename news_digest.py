@@ -265,10 +265,16 @@ def summarize_category(articles, category, client):
     )
 
     prompt = (
-        f"将以下 {len(articles)} 条「{category}」新闻翻译标题并写中文摘要。\n\n"
+        f"将以下 {len(articles)} 条「{category}」新闻翻译标题，并为每条写详细的中文摘要。\n\n"
         "严格只返回JSON数组，格式：\n"
-        '[{"i":1,"t":"中文标题","s":"2-3句摘要，重点：核心事件+为什么重要"},...]\n'
+        '[{"i":1,"t":"中文标题","s":"详细摘要"},...]\n'
         "不要输出任何其他内容，不要markdown代码块。\n\n"
+        "每条摘要要求（100-150字）：\n"
+        "1. 背景：这件事发生的背景或起因\n"
+        "2. 核心事件：具体发生了什么，涉及哪些人/公司/机构\n"
+        "3. 关键细节：重要的数字、时间节点、具体决策内容\n"
+        "4. 影响与意义：为什么重要，可能带来什么影响\n"
+        "目标：读者读完摘要后，不需要看原文就能完全了解这件事。\n\n"
         f"新闻：\n{article_text}"
     )
 
@@ -276,7 +282,7 @@ def summarize_category(articles, category, client):
         resp = client.chat.completions.create(
             model="deepseek-chat",
             messages=[{"role": "user", "content": prompt}],
-            max_tokens=3000,
+            max_tokens=8000,
         )
         content = resp.choices[0].message.content.strip()
         content = re.sub(r"^```(?:json)?\s*", "", content)
@@ -287,16 +293,16 @@ def summarize_category(articles, category, client):
         try:
             # Retry: ask for simpler format to reduce JSON errors
             simple_prompt = (
-                f"为以下{len(articles)}条新闻分别写一句中文摘要（20字以内），"
+                f"为以下{len(articles)}条新闻分别写50字左右的中文摘要，"
                 "只返回JSON数组格式：\n"
-                '[{"i":1,"t":"中文标题","s":"一句摘要"},...]\n'
+                '[{"i":1,"t":"中文标题","s":"摘要"},...]\n'
                 "不含任何其他文字。\n\n"
                 f"{article_text}"
             )
             resp2 = client.chat.completions.create(
                 model="deepseek-chat",
                 messages=[{"role": "user", "content": simple_prompt}],
-                max_tokens=1500,
+                max_tokens=4000,
             )
             c2 = re.sub(r"^```(?:json)?\s*", "", resp2.choices[0].message.content.strip())
             c2 = re.sub(r"\s*```$", "", c2)
@@ -318,8 +324,8 @@ def summarize_leader(leader_name, articles, client):
         for a in articles
     )
     prompt = (
-        f"以下是关于{leader_name}的最新新闻，请用中文写一段3-5句话的动态摘要。\n"
-        "重点：他做了什么、说了什么、决定了什么，为什么值得关注。\n"
+        f"以下是关于{leader_name}的最新新闻，请用中文写一段详细的动态总结（150-200字）。\n"
+        "覆盖：具体做了什么/说了什么/决定了什么、涉及的关键细节（数字/时间/合作方）、背景原因、为什么值得关注、可能带来什么影响。\n"
         "语言直接，不废话，直接陈述事实，不用【根据以上新闻】之类的开头。\n\n"
         f"{article_text}"
     )
@@ -327,7 +333,7 @@ def summarize_leader(leader_name, articles, client):
         resp = client.chat.completions.create(
             model="deepseek-chat",
             messages=[{"role": "user", "content": prompt}],
-            max_tokens=400,
+            max_tokens=800,
         )
         return resp.choices[0].message.content.strip()
     except Exception as e:
