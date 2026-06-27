@@ -382,7 +382,7 @@ def build_email(section_html_blocks, date_str):
 <body style="font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;max-width:720px;margin:0 auto;padding:24px;color:#222;line-height:1.75;">
 
 <h1 style="font-size:22px;border-bottom:2px solid #222;padding-bottom:10px;margin-bottom:4px;">
-  科技 · 财经 · 国际 日报
+  Daily Digest: AI · Tech · Finance · World · Leaders
 </h1>
 <p style="color:#888;margin-top:4px;font-size:14px;">{date_str}</p>
 """
@@ -398,7 +398,7 @@ def build_email(section_html_blocks, date_str):
 
     html += (
         '\n<hr style="margin-top:48px;border:none;border-top:1px solid #eee;">'
-        '\n<p style="color:#bbb;font-size:12px;">Rocky News Digest · 每日 07:30 自动生成</p>'
+        '\n<p style="color:#bbb;font-size:12px;">Daily Digest · AI · Tech · Finance · World · Leaders · auto-generated at 07:30</p>'
         "\n</body>\n</html>"
     )
     return html
@@ -407,7 +407,7 @@ def build_email(section_html_blocks, date_str):
 # ── Send ──────────────────────────────────────────────────────────────────────
 
 def send_email(html_body, date_str):
-    subject = f"日报 {date_str} ｜ 科技 · 财经 · 国际 · 大佬动态"
+    subject = f"Daily Digest {date_str} · AI · Tech · Finance · World · Leaders"
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
     msg["From"]    = EMAIL_FROM

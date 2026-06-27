@@ -1,6 +1,6 @@
-# Rocky News Digest
+# Daily Digest: AI · Tech · Finance · World · Leaders
 
-A daily email digest that automatically aggregates and summarizes news across four categories — AI, Tech, Finance, and World News — plus a dedicated section tracking the latest moves from tech leaders worldwide.
+A daily email digest that automatically aggregates and summarizes news across five categories — AI, Tech, Finance, World News, and Tech Leaders — delivered every morning to your inbox.
 
 Runs every morning at 07:30 via cron. Fetches RSS feeds, summarizes with DeepSeek V3, and sends a clean HTML email via Gmail.
 
