@@ -421,11 +421,11 @@ def send_email(html_body, date_str):
     msg.attach(MIMEText(html_body, "html", "utf-8"))
 
     if PROXY_HOST:
-        socks.set_default_proxy(socks.SOCKS5, PROXY_HOST, PROXY_PORT)
+        socks.set_default_proxy(socks.HTTP, PROXY_HOST, PROXY_PORT)
         socket.socket = socks.socksocket
 
-    ctx = ssl.create_default_context()
-    with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, context=ctx) as server:
+    with smtplib.SMTP(SMTP_HOST, 587) as server:
+        server.starttls()
         server.login(EMAIL_FROM, EMAIL_PASSWORD)
         server.sendmail(EMAIL_FROM, [EMAIL_TO], msg.as_string())
     log.info(f"Email sent: {subject}")
@@ -450,9 +450,6 @@ def main():
             new_seen[aid] = datetime.now(timezone.utc).isoformat()
         category_articles[category] = arts
         log.info(f"  [{category}] {len(arts)} new articles")
-
-    seen.update(new_seen)
-    save_seen(seen)
 
     # ── 2. Fetch tech leaders via Google News ──
     leader_results = {}
@@ -490,6 +487,11 @@ def main():
     date_str = datetime.now().strftime("%Y年%m月%d日")
     html = build_email(section_html, date_str)
     send_email(html, datetime.now().strftime("%Y-%m-%d"))
+
+    # Mark articles seen only after the email went out, so a failed send
+    # leaves them eligible for the next run instead of silently dropped.
+    seen.update(new_seen)
+    save_seen(seen)
     log.info("=== Done ===")
 
 
